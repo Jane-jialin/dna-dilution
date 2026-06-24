@@ -4,464 +4,381 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="DNA稀释">
-<meta name="theme-color" content="#0a0e14">
-<meta name="mobile-web-app-capable" content="yes">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#ffffff">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<title>DNA 稀释计算器</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<title>DNA Dilution Calculator</title>
 <style>
-  :root {
-    --bg: #0a0e14;
-    --surface: #111820;
-    --surface-2: #182030;
-    --border: #1e2d3d;
-    --accent: #3ecf8e;
-    --accent-glow: rgba(62, 207, 142, 0.15);
-    --accent-dim: rgba(62, 207, 142, 0.6);
-    --text: #e8edf3;
-    --text-muted: #5a6a7a;
-    --text-label: #8a99aa;
-    --danger: #ef6461;
-    --dna-purple: #b388ff;
-    --water-blue: #4dd0e1;
-    --sat: env(safe-area-inset-top, 0px);
-    --sab: env(safe-area-inset-bottom, 0px);
-  }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:16px}
+body{
+  font-family:'Noto Sans SC',sans-serif;
+  background:#ffffff;color:#111827;
+  min-height:100vh;
+  display:-webkit-flex;display:flex;
+  -webkit-flex-direction:column;flex-direction:column;
+  padding:12px 16px;
+  -webkit-font-smoothing:antialiased;
+}
+.app{
+  width:100%;max-width:480px;margin:0 auto;
+  display:-webkit-flex;display:flex;
+  -webkit-flex-direction:column;flex-direction:column;
+  -webkit-flex:1;flex:1;
+}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+.header{text-align:center;padding:4px 0 14px;-webkit-flex-shrink:0;flex-shrink:0}
+.header h1{font-size:1.2rem;font-weight:700;letter-spacing:-0.02em}
+.header p{font-size:12px;color:#9ca3af;font-weight:300;margin-top:2px}
 
-  html { font-size: 16px; }
+.main-card{
+  -webkit-flex-shrink:0;flex-shrink:0;
+  background:#fff;border:1.5px solid #e0e4ea;border-radius:16px;
+  padding:16px 16px 14px;margin-bottom:10px;
+}
 
-  body {
-    font-family: 'Noto Sans SC', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    min-height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: calc(1.5rem + var(--sat)) 1.25rem calc(1.5rem + var(--sab));
-    position: relative;
-    overflow-x: hidden;
-    -webkit-font-smoothing: antialiased;
-  }
+.input-section{margin-bottom:14px}
+.input-label{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;gap:6px;margin-bottom:8px}
+.dot-green{width:7px;height:7px;border-radius:50%;background:#16a34a;-webkit-flex-shrink:0;flex-shrink:0}
+.input-label span{font-size:12px;font-weight:600;color:#6b7280;letter-spacing:0.05em}
 
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse at 25% 20%, rgba(62, 207, 142, 0.04) 0%, transparent 50%),
-      radial-gradient(ellipse at 75% 80%, rgba(79, 195, 247, 0.03) 0%, transparent 50%);
-    pointer-events: none;
-  }
+.input-wrap{
+  display:-webkit-flex;display:flex;
+  -webkit-align-items:center;align-items:center;
+  gap:4px;
+  background:#f5f7fa;border:1.5px solid #e0e4ea;border-radius:11px;
+  padding:0 6px 0 12px;
+  -webkit-transition:border-color 0.2s,box-shadow 0.2s;
+  transition:border-color 0.2s,box-shadow 0.2s;
+}
+.input-wrap:focus-within{
+  border-color:#16a34a;
+  -webkit-box-shadow:0 0 0 3px rgba(22,163,74,0.07);
+  box-shadow:0 0 0 3px rgba(22,163,74,0.07);
+}
 
-  .container {
-    width: 100%;
-    max-width: 480px;
-    position: relative;
-    z-index: 1;
-  }
+.input-wrap input{
+  -webkit-flex:1;flex:1;
+  border:none;background:transparent;
+  padding:12px 0;
+  color:#111827;
+  font-family:'JetBrains Mono',monospace;
+  font-size:20px;font-weight:600;
+  outline:none;-webkit-appearance:none;
+  min-width:0;
+}
+.input-wrap input::-webkit-input-placeholder{
+  color:#9ca3af;font-family:'Noto Sans SC',sans-serif;font-size:14px;font-weight:300;
+}
 
-  /* Header */
-  .header {
-    text-align: center;
-    margin-bottom: 2rem;
-    animation: fadeDown 0.6s ease forwards;
-  }
+.clear-btn{
+  display:none;
+  -webkit-align-items:center;align-items:center;
+  -webkit-justify-content:center;justify-content:center;
+  width:28px;height:28px;border-radius:50%;
+  background:#e5e7eb;border:none;cursor:pointer;
+  -webkit-flex-shrink:0;flex-shrink:0;
+  -webkit-transition:background 0.15s,transform 0.1s;
+  transition:background 0.15s,transform 0.1s;
+}
+.clear-btn.show{display:-webkit-flex;display:flex}
+.clear-btn:active{background:#d1d5db;-webkit-transform:scale(0.9);transform:scale(0.9)}
+.clear-btn svg{width:14px;height:14px}
 
-  .header-icon {
-    width: 52px;
-    height: 52px;
-    margin: 0 auto 0.9rem;
-    background: linear-gradient(135deg, var(--accent), #4fc3f7);
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    box-shadow: 0 8px 32px rgba(62, 207, 142, 0.2);
-  }
+.unit-label{text-align:right;margin-top:5px;font-size:12px;color:#6b7280}
 
-  .header h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.3rem; }
-  .header p { font-size: 0.82rem; color: var(--text-muted); font-weight: 300; }
+.divider-line{
+  border:none;border-top:1px dashed #e0e4ea;
+  margin:0 0 14px;
+}
 
-  /* Card */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-    opacity: 0;
-    animation: fadeUp 0.5s ease forwards;
-  }
-  .card:nth-child(2) { animation-delay: 0.12s; }
-  .card:nth-child(3) { animation-delay: 0.24s; }
+.result-section{text-align:center}
+.result-label{
+  display:-webkit-flex;display:flex;
+  -webkit-align-items:center;align-items:center;
+  -webkit-justify-content:center;justify-content:center;
+  gap:5px;margin-bottom:6px;
+}
+.result-label span{font-size:12px;font-weight:600;color:#6b7280}
+.result-number{
+  font-family:'JetBrains Mono',monospace;
+  font-size:44px;font-weight:600;color:#16a34a;
+  line-height:1.15;
+}
+.result-number.err{
+  color:#dc2626;font-size:16px;
+  font-family:'Noto Sans SC',sans-serif;font-weight:500;
+}
+.result-sub{font-family:'JetBrains Mono',monospace;font-size:12px;color:#9ca3af;margin-top:2px}
 
-  .card-title {
-    font-size: 0.68rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--text-muted);
-    margin-bottom: 1.1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-  }
+.summary{
+  display:-webkit-flex;display:flex;
+  -webkit-justify-content:center;justify-content:center;
+  margin-top:12px;padding-top:10px;
+  border-top:1px solid #e0e4ea;
+}
+.summary-item{
+  -webkit-flex:1;flex:1;text-align:center;padding:3px 0;
+}
+.summary-item+.summary-item{border-left:1px solid #e0e4ea}
+.summary-item .s-label{font-size:9px;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;margin-bottom:1px}
+.summary-item .s-val{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500}
+.s-sample{color:#7c3aed}.s-water{color:#0891b2}.s-total{color:#16a34a}
 
-  .card-title::before {
-    content: '';
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--accent);
-    flex-shrink: 0;
-  }
+.settings-card{
+  -webkit-flex-shrink:0;flex-shrink:0;
+  background:#fff;border:1px solid #e0e4ea;border-radius:14px;
+  overflow:hidden;
+}
+.settings-toggle{
+  display:-webkit-flex;display:flex;
+  -webkit-align-items:center;align-items:center;
+  -webkit-justify-content:space-between;justify-content:space-between;
+  padding:12px 16px;cursor:pointer;
+  -webkit-user-select:none;user-select:none;
+}
+.settings-toggle:active{background:#f5f7fa}
+.st-left{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;gap:7px}
+.st-left .gear{font-size:14px;opacity:0.5}
+.st-left .text{font-size:13px;font-weight:500;color:#6b7280}
+.arrow-icon{font-size:11px;color:#9ca3af;-webkit-transition:transform 0.25s;transition:transform 0.25s}
+.arrow-icon.open{-webkit-transform:rotate(180deg);transform:rotate(180deg)}
 
-  .input-group { margin-bottom: 1rem; }
-  .input-group:last-child { margin-bottom: 0; }
+.settings-body{
+  max-height:0;overflow:hidden;
+  -webkit-transition:max-height 0.35s ease;
+  transition:max-height 0.35s ease;
+}
+.settings-body.open{max-height:300px}
+.settings-inner{padding:0 16px 14px}
+.setting-row{
+  display:-webkit-flex;display:flex;
+  -webkit-align-items:center;align-items:center;
+  -webkit-justify-content:space-between;justify-content:space-between;
+  padding:10px 0;
+}
+.setting-row+.setting-row{border-top:1px solid #e0e4ea}
+.setting-info{-webkit-flex:1;flex:1;margin-right:12px}
+.setting-info .s-title{font-size:13px;font-weight:500;margin-bottom:1px}
+.setting-info .s-desc{font-size:11px;color:#9ca3af}
+.si-group{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;gap:5px;-webkit-flex-shrink:0;flex-shrink:0}
+.si-input{
+  width:70px;background:#f5f7fa;
+  border:1px solid #e0e4ea;border-radius:8px;
+  padding:8px 6px;color:#111827;
+  font-family:'JetBrains Mono',monospace;
+  font-size:15px;font-weight:500;text-align:center;
+  outline:none;-webkit-appearance:none;
+}
+.si-input:focus{border-color:#2563eb}
+.si-unit{font-family:'JetBrains Mono',monospace;font-size:11px;color:#9ca3af;width:36px}
 
-  .input-group label {
-    display: block;
-    font-size: 0.78rem;
-    color: var(--text-label);
-    margin-bottom: 0.45rem;
-  }
+.formula-box{
+  -webkit-flex-shrink:0;flex-shrink:0;
+  margin-top:10px;padding:8px 12px;
+  background:rgba(37,99,235,0.04);
+  border:1px solid rgba(37,99,235,0.08);
+  border-radius:8px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;color:#9ca3af;line-height:1.65;
+}
+.formula-box .hl{color:#2563eb;font-weight:500}
+.formula-box .hl-g{color:rgba(22,163,74,0.8);font-weight:500}
 
-  .input-wrapper { position: relative; display: flex; align-items: center; }
+.footer{-webkit-flex-shrink:0;flex-shrink:0;text-align:center;padding:10px 0 0;font-size:9px;color:#9ca3af}
 
-  .input-wrapper input {
-    width: 100%;
-    background: var(--surface-2);
-    border: 1.5px solid var(--border);
-    border-radius: 11px;
-    padding: 0.8rem 3.2rem 0.8rem 0.9rem;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 1.1rem;
-    font-weight: 500;
-    outline: none;
-    -webkit-appearance: none;
-    transition: border-color 0.25s ease, box-shadow 0.25s ease;
-  }
-
-  .input-wrapper input::placeholder {
-    color: var(--text-muted);
-    font-family: 'Noto Sans SC', sans-serif;
-    font-size: 0.82rem;
-    font-weight: 300;
-  }
-
-  .input-wrapper input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-glow);
-  }
-
-  .input-wrapper .unit {
-    position: absolute;
-    right: 0.9rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    pointer-events: none;
-  }
-
-  /* Readonly */
-  .readonly-wrapper { position: relative; display: flex; align-items: center; }
-  .readonly-input {
-    width: 100%;
-    background: rgba(30, 45, 61, 0.3);
-    border: 1.5px solid var(--border);
-    border-radius: 11px;
-    padding: 0.8rem 3.2rem 0.8rem 0.9rem;
-    color: var(--text-muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 1.1rem;
-    font-weight: 400;
-  }
-  .lock-icon { position: absolute; right: 3rem; font-size: 0.65rem; opacity: 0.4; }
-  .readonly-wrapper .unit {
-    position: absolute;
-    right: 0.9rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    pointer-events: none;
-  }
-
-  /* Result */
-  .result-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 1.5rem;
-    text-align: center;
-    opacity: 0;
-    animation: fadeUp 0.5s ease 0.24s forwards;
-    transition: border-color 0.4s ease, box-shadow 0.4s ease;
-  }
-
-  .result-card.has-result {
-    border-color: rgba(62, 207, 142, 0.3);
-    box-shadow: 0 0 40px rgba(62, 207, 142, 0.06);
-  }
-
-  .result-card.error {
-    border-color: rgba(239, 100, 97, 0.3);
-    box-shadow: 0 0 40px rgba(239, 100, 97, 0.06);
-  }
-
-  .result-label {
-    font-size: 0.68rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--text-muted);
-    margin-bottom: 0.65rem;
-  }
-
-  .result-value {
-    font-family: 'DM Mono', monospace;
-    font-size: 2.2rem;
-    font-weight: 500;
-    color: var(--accent);
-    line-height: 1.2;
-    transition: opacity 0.3s ease;
-  }
-
-  .result-value.error {
-    color: var(--danger);
-    font-family: 'Noto Sans SC', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 400;
-  }
-
-  .result-unit {
-    font-size: 0.82rem;
-    color: var(--text-muted);
-    margin-top: 0.35rem;
-    font-family: 'DM Mono', monospace;
-  }
-
-  .result-summary {
-    margin-top: 1.25rem;
-    padding-top: 1.1rem;
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: center;
-    gap: 1.8rem;
-  }
-
-  .summary-item { text-align: center; }
-  .summary-item .label {
-    font-size: 0.6rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-muted);
-    margin-bottom: 0.25rem;
-  }
-  .summary-item .value { font-family: 'DM Mono', monospace; font-size: 0.9rem; font-weight: 500; }
-  .summary-item .value.sample { color: var(--dna-purple); }
-  .summary-item .value.water { color: var(--water-blue); }
-  .summary-item .value.total { color: var(--accent); }
-
-  .formula {
-    margin-top: 1.1rem;
-    padding: 0.65rem 0.9rem;
-    background: rgba(62, 207, 142, 0.04);
-    border-radius: 9px;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.68rem;
-    color: var(--text-muted);
-    letter-spacing: 0.02em;
-    line-height: 1.6;
-  }
-  .formula span.accent { color: var(--accent-dim); }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(14px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes fadeDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-  }
-  .result-value.pulse { animation: pulse 0.4s ease; }
-
-  input[type=number]::-webkit-inner-spin-button,
-  input[type=number]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-  input[type=number] { -moz-appearance: textfield; }
-
-  .footer {
-    margin-top: 1.5rem;
-    text-align: center;
-    font-size: 0.65rem;
-    color: var(--text-muted);
-    opacity: 0;
-    animation: fadeUp 0.5s ease 0.4s forwards;
-  }
-
-  @media (max-width: 380px) {
-    body { padding: calc(1rem + var(--sat)) 0.9rem calc(1rem + var(--sab)); }
-    .card, .result-card { padding: 1.2rem; border-radius: 14px; }
-    .result-value { font-size: 1.9rem; }
-    .header h1 { font-size: 1.25rem; }
-  }
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
+@media(max-width:360px){.result-number{font-size:36px}.input-wrap input{font-size:18px}}
 </style>
 </head>
 <body>
 
-<div class="container">
+<div class="app">
+
   <div class="header">
-    <div class="header-icon">🧬</div>
-    <h1>DNA 稀释计算器</h1>
-    <p>输入样品浓度，计算所需加水量</p>
+    <h1>DNA Dilution Calculator</h1>
+    <p>DNA dilution water volume calculator</p>
   </div>
 
-  <div class="card">
-    <div class="card-title">实验参数</div>
-    <div class="input-group">
-      <label>样品体积</label>
-      <div class="readonly-wrapper">
-        <div class="readonly-input">10</div>
-        <span class="lock-icon">🔒</span>
-        <span class="unit">μL</span>
+  <div class="main-card">
+
+    <div class="input-section">
+      <div class="input-label">
+        <div class="dot-green"></div>
+        <span id="lblConc">DNA Concentration (enter value)</span>
+      </div>
+      <div class="input-wrap">
+        <input type="number" id="c1" placeholder="Enter concentration" step="any" min="0" inputmode="decimal" autocomplete="off">
+        <button class="clear-btn" id="clearBtn" type="button">
+          <svg viewBox="0 0 14 14"><line x1="3" y1="3" x2="11" y2="11" stroke="#6b7280" stroke-width="2.5" stroke-linecap="round"/><line x1="11" y1="3" x2="3" y2="11" stroke="#6b7280" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="unit-label">ng/uL</div>
+    </div>
+
+    <div class="divider-line"></div>
+
+    <div class="result-section">
+      <div class="result-label">
+        <div class="dot-green"></div>
+        <span>Water volume to add</span>
+      </div>
+      <div class="result-number" id="rNum">-</div>
+      <div class="result-sub" id="rSub"></div>
+      <div class="summary" id="summary" style="display:none">
+        <div class="summary-item"><div class="s-label">Sample</div><div class="s-val s-sample" id="sSample"></div></div>
+        <div class="summary-item"><div class="s-label">Water</div><div class="s-val s-water" id="sWater"></div></div>
+        <div class="summary-item"><div class="s-label">Total</div><div class="s-val s-total" id="sTotal"></div></div>
       </div>
     </div>
-    <div class="input-group">
-      <label>目标浓度</label>
-      <div class="readonly-wrapper">
-        <div class="readonly-input">1</div>
-        <span class="lock-icon">🔒</span>
-        <span class="unit">ng/μL</span>
+
+  </div>
+
+  <div class="settings-card">
+    <div class="settings-toggle" id="toggleBtn">
+      <div class="st-left"><span class="gear">&#9881;</span><span class="text" id="lblSettings">Settings</span></div>
+      <span class="arrow-icon" id="arrow">&#9662;</span>
+    </div>
+    <div class="settings-body" id="settingsBody">
+      <div class="settings-inner">
+        <div class="setting-row">
+          <div class="setting-info"><div class="s-title" id="lblVol">Sample volume</div><div class="s-desc" id="lblVolD">Default 10 uL</div></div>
+          <div class="si-group">
+            <input class="si-input" type="number" id="v1" value="10" step="any" min="0" inputmode="decimal">
+            <span class="si-unit">uL</span>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info"><div class="s-title" id="lblTgt">Target concentration</div><div class="s-desc" id="lblTgtD">Default 1 ng/uL</div></div>
+          <div class="si-group">
+            <input class="si-input" type="number" id="c2" value="1" step="any" min="0" inputmode="decimal">
+            <span class="si-unit">ng/uL</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-title">样品浓度</div>
-    <div class="input-group">
-      <label>当前 DNA 浓度</label>
-      <div class="input-wrapper">
-        <input type="number" id="concentration" placeholder="请输入浓度值" step="any" min="0" autocomplete="off" inputmode="decimal">
-        <span class="unit">ng/μL</span>
-      </div>
-    </div>
-  </div>
+  <div class="formula-box" id="formula">Formula: C1 x V1 = C2 x V2 -> Vw = V2 - V1</div>
+  <div class="footer">C1V1 = C2V2</div>
 
-  <div class="result-card" id="resultCard">
-    <div class="result-label">需添加纯水量</div>
-    <div class="result-value" id="resultValue">—</div>
-    <div class="result-unit" id="resultUnit"></div>
-    <div class="result-summary" id="resultSummary" style="display:none;">
-      <div class="summary-item">
-        <div class="label">样品</div>
-        <div class="value sample">10 μL</div>
-      </div>
-      <div class="summary-item">
-        <div class="label">加水</div>
-        <div class="value water" id="waterVol">—</div>
-      </div>
-      <div class="summary-item">
-        <div class="label">终体积</div>
-        <div class="value total" id="totalVol">—</div>
-      </div>
-    </div>
-    <div class="formula" id="formula">
-      C₁ × V₁ = C₂ × V₂ → V<sub>水</sub> = V₂ − V₁
-    </div>
-  </div>
-
-  <div class="footer">基于 C₁V₁ = C₂V₂ 稀释公式 · DNA Dilution Calculator</div>
 </div>
 
 <script>
-  const input = document.getElementById('concentration');
-  const resultCard = document.getElementById('resultCard');
-  const resultValue = document.getElementById('resultValue');
-  const resultUnit = document.getElementById('resultUnit');
-  const resultSummary = document.getElementById('resultSummary');
-  const waterVol = document.getElementById('waterVol');
-  const totalVol = document.getElementById('totalVol');
-  const formula = document.getElementById('formula');
+(function(){
+  var c1El=document.getElementById('c1');
+  var v1El=document.getElementById('v1');
+  var c2El=document.getElementById('c2');
+  var rNum=document.getElementById('rNum');
+  var rSub=document.getElementById('rSub');
+  var summary=document.getElementById('summary');
+  var sSample=document.getElementById('sSample');
+  var sWater=document.getElementById('sWater');
+  var sTotal=document.getElementById('sTotal');
+  var formula=document.getElementById('formula');
+  var clearBtn=document.getElementById('clearBtn');
 
-  const V1 = 10;
-  const C2 = 1;
+  // Detect language
+  var lang='en';
+  if(navigator.language&&navigator.language.indexOf('zh')>=0){lang='zh';}
 
-  function calculate() {
-    const raw = input.value.trim();
-    resultCard.classList.remove('has-result', 'error');
-
-    if (raw === '') {
-      resultValue.textContent = '—';
-      resultValue.className = 'result-value';
-      resultUnit.textContent = '';
-      resultSummary.style.display = 'none';
-      formula.innerHTML = 'C₁ × V₁ = C₂ × V₂ → V<sub>水</sub> = V₂ − V₁';
-      return;
-    }
-
-    const C1 = parseFloat(raw);
-
-    if (isNaN(C1) || C1 <= 0) {
-      resultCard.classList.add('error');
-      resultValue.textContent = '请输入有效的正数浓度';
-      resultValue.className = 'result-value error';
-      resultUnit.textContent = '';
-      resultSummary.style.display = 'none';
-      formula.innerHTML = '';
-      return;
-    }
-
-    if (C1 < C2) {
-      resultCard.classList.add('error');
-      resultValue.textContent = '浓度低于目标值，无法稀释';
-      resultValue.className = 'result-value error';
-      resultUnit.textContent = '';
-      resultSummary.style.display = 'none';
-      formula.innerHTML = '当前浓度需 ≥ 目标浓度，加水只能降低浓度';
-      return;
-    }
-
-    const V2 = (C1 * V1) / C2;
-    const water = V2 - V1;
-
-    resultCard.classList.add('has-result');
-    resultValue.className = 'result-value pulse';
-    resultValue.textContent = water.toFixed(2);
-    resultUnit.textContent = 'μL (微升)';
-
-    resultSummary.style.display = 'flex';
-    waterVol.textContent = water.toFixed(2) + ' μL';
-    totalVol.textContent = V2.toFixed(2) + ' μL';
-
-    formula.innerHTML =
-      '<span class="accent">' + C1 + '</span> × ' + V1 + ' = <span class="accent">' + C2 + '</span> × <span class="accent">' + V2.toFixed(2) + '</span>' +
-      ' → V<sub>水</sub> = ' + V2.toFixed(2) + ' − ' + V1 + ' = <span class="accent">' + water.toFixed(2) + ' μL</span>';
-
-    setTimeout(() => resultValue.classList.remove('pulse'), 400);
+  if(lang==='zh'){
+    document.getElementById('lblConc').textContent='\u5F53\u524D DNA \u6D53\u5EA6\uFF08\u9700\u8981\u586B\u5199\uFF09';
+    document.getElementById('lblSettings').textContent='\u53C2\u6570\u8BBE\u7F6E';
+    document.getElementById('lblVol').textContent='\u6837\u54C1\u4F53\u79EF';
+    document.getElementById('lblVolD').textContent='\u9ED8\u8BA4 10 \u03BCL';
+    document.getElementById('lblTgt').textContent='\u76EE\u6807\u6D53\u5EA6';
+    document.getElementById('lblTgtD').textContent='\u9ED8\u8BA4 1 ng/\u03BCL';
+    document.title='DNA \u7A00\u91CA\u8BA1\u7B97\u5668';
+    c1El.placeholder='\u8F93\u5165\u6D53\u5EA6';
   }
 
-  input.addEventListener('input', calculate);
-
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+  function updateClear(){
+    if(c1El.value.length>0){clearBtn.className='clear-btn show';}
+    else{clearBtn.className='clear-btn';}
   }
+
+  clearBtn.addEventListener('click',function(ev){
+    ev.preventDefault();
+    c1El.value='';
+    c1El.focus();
+    updateClear();
+    calc();
+  });
+
+  document.getElementById('toggleBtn').addEventListener('click',function(){
+    var body=document.getElementById('settingsBody');
+    var arrow=document.getElementById('arrow');
+    if(body.className.indexOf('open')>=0){
+      body.className='settings-body';
+      arrow.className='arrow-icon';
+    }else{
+      body.className='settings-body open';
+      arrow.className='arrow-icon open';
+    }
+  });
+
+  function calc(){
+    updateClear();
+    var c1=parseFloat(c1El.value);
+    var v1=parseFloat(v1El.value);
+    var c2=parseFloat(c2El.value);
+
+    if(!c1El.value||c1El.value.trim()===''){reset();return;}
+
+    if(isNaN(c1)||c1<=0||isNaN(v1)||v1<=0||isNaN(c2)||c2<=0){
+      var msg=lang==='zh'?'\u8BF7\u8F93\u5165\u6709\u6548\u6B63\u6570':'Enter valid positive numbers';
+      rNum.className='result-number err';
+      rNum.textContent=msg;
+      rSub.textContent='';
+      summary.style.display='none';
+      formula.innerHTML='';
+      return;
+    }
+
+    if(c1<c2){
+      var msg2=lang==='zh'?'\u6D53\u5EA6\u4F4E\u4E8E\u76EE\u6807\u503C':'Concentration below target';
+      rNum.className='result-number err';
+      rNum.textContent=msg2;
+      rSub.textContent=lang==='zh'?'\u65E0\u6CD5\u901A\u8FC7\u52A0\u6C34\u7A00\u91CA':'Cannot dilute by adding water';
+      summary.style.display='none';
+      formula.innerHTML=lang==='zh'?'\u52A0\u6C34\u53EA\u80FD\u964D\u4F4E\u6D53\u5EA6\uFF0C\u5F53\u524D\u6D53\u5EA6 \u2265 \u76EE\u6807\u6D53\u5EA6':'Adding water only lowers concentration';
+      return;
+    }
+
+    var v2=(c1*v1)/c2;
+    var water=v2-v1;
+
+    rNum.className='result-number';
+    rNum.textContent=water.toFixed(2);
+    rSub.textContent='uL';
+
+    summary.style.display='-webkit-flex';
+    summary.style.display='flex';
+    sSample.textContent=v1.toFixed(2)+' uL';
+    sWater.textContent=water.toFixed(2)+' uL';
+    sTotal.textContent=v2.toFixed(2)+' uL';
+
+    formula.innerHTML='<span class="hl">'+c1+'</span> \u00D7 '+v1.toFixed(2)+' = <span class="hl">'+c2+'</span> \u00D7 <span class="hl">'+v2.toFixed(2)+'</span> \u2192 Vw = '+v2.toFixed(2)+' \u2212 '+v1.toFixed(2)+' = <span class="hl-g">'+water.toFixed(2)+' uL</span>';
+  }
+
+  function reset(){
+    rNum.className='result-number';
+    rNum.textContent='-';
+    rSub.textContent='';
+    summary.style.display='none';
+    formula.innerHTML=lang==='zh'?'\u516C\u5F0F\uFF1AC\u2081 \u00D7 V\u2081 = C\u2082 \u00D7 V\u2082 \u2192 V\u6C34 = V\u2082 \u2212 V\u2081':'Formula: C1 x V1 = C2 x V2 -> Vw = V2 - V1';
+  }
+
+  c1El.addEventListener('input',calc);
+  v1El.addEventListener('input',calc);
+  c2El.addEventListener('input',calc);
+
+  setTimeout(function(){try{c1El.focus();}catch(e){}},300);
+})();
 </script>
 </body>
 </html>
